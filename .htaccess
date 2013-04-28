@@ -3,6 +3,7 @@ Options +FollowSymlinks
 RewriteEngine On
 RewriteBase /InventoryXMLReader/
 
+RewriteRule ^index.php$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.+)$ reader.php?fileName=$1 [L]
+RewriteRule . index.php [L]

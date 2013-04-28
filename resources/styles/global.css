@@ -1,0 +1,111 @@
+body {
+  margin: 0;
+  background: #F6F9FC;
+  color: #000;
+}
+
+body, th, td {
+  font: 16px/1.6 sans-serif;
+}
+
+h1 {
+  height: 60px;
+  line-height: 60px;
+  margin: 0;
+  padding: 0 15px;
+  border-bottom: 5px solid #08C;
+  background: #333;
+  color: #FFF;
+  font-size: 24px;
+}
+
+#breadcrumb {
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #BCD;
+  background: #ECF2F5;
+}
+
+#fileList {
+  list-style: none;
+  margin: 10px;
+  padding: 0;
+}
+
+#fileList li {
+  position: relative;
+  margin-bottom: 4px;
+  padding: 8px 40px 4px;
+  border-top: 1px dotted #BBB;
+}
+
+#fileList li:before,
+#fileList li:after {
+  position: absolute;
+  content: ' ';
+  top: 50%;
+}
+
+#fileList li:before {
+  left: 13px;
+  width: 8px;
+  height: 12px;
+  margin-top: -6px;
+  border: 2px solid #000;
+  background: transparent;
+}
+
+#fileList li:after {
+  left: 12px;
+  margin-top: -7px;
+  border: 3px solid;
+  border-color: #FFF #000 #000 #FFF;
+  background: transparent;
+  
+}
+
+a {
+  color: #07B;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #666;
+  text-decoration: underline;
+}
+
+table {
+  margin: 10px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th,
+td {
+  padding: 10px;
+  border: 1px solid #000000;
+  font-size: 75%;
+  vertical-align: baseline;
+}
+
+ol {
+  margin: 0;
+  padding-left: 40px;
+}
+
+th {
+  font-weight: 700;
+  text-align: left;
+}
+
+.errorMessage {
+  margin: 10px;
+  padding: 10px;
+  border: 1px dotted #F00;
+  background: #F99;
+}
+
+.errorMessage:before {
+  content: 'Error: ';
+  font-weight: 700;
+}

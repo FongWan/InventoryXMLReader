@@ -1,30 +1,7 @@
 <?php
-// Obtener la ruta absoluta del directorio actual como un constante
-define('ABSPATH', dirname(__FILE__) . '/');
-
-// Obtener la ubicación web actual como un constante
-define('WEBPATH', $_SERVER['REQUEST_URI']);
-
-// Mejora de rendimiento
-ob_start('ob_gzhandler');
-
-// Configurar el tipo de contenido que va a ser enviado
-header('Content-Type: text/html; charset=utf-8');
-?>
-<!DOCTYPE html>
-<link rel="stylesheet" href="<?php echo WEBPATH; ?>resources/styles/global.css"> 
-<title>Detalles - Equipos Quiborax S.A.</title>
-<?php
 // Revisar si ha recibido el nombre del archivo y que no esté vacío
-if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
-  // Ubicación de datos
-  $path = ABSPATH . 'data';
-
-  // Nombre del archivo
-  $fileName = trim($_GET['fileName']);
-
-  echo '<h1>Detalles de Equipo: ' . $fileName . '</h1>';
-  echo '<nav><a href="./">Lista de equipos</a> > <b>Detalles</b></nav>';
+if (!empty($fileName)) {
+  echo '<nav id="breadcrumb"><a href="./">Lista de equipos</a> > <b>Detalles de Equipo: ' . $fileName . '</b></nav>';
 
   // Reemplazar parte del nombre que tiene más de 2 puntos en uno solo
   $fileName = preg_replace('/[\.]{2,}/', '.', $fileName);
@@ -33,11 +10,11 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
   $fileName .= '.xml';
 
   // Revisar si existe el archivo
-  if (file_exists($path . '/' . $fileName)) {
+  if (file_exists(DATAPATH . $fileName)) {
     // Sí existe el archivo
 
     // Leer los datos de XML
-    $fileData = simplexml_load_file($path . '/' . $fileName);
+    $fileData = simplexml_load_file(DATAPATH . '/' . $fileName);
 
     echo '<table>';
 
@@ -52,19 +29,22 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
       // Imprimir datos de los procesadores
       echo '<tr><th>Procesadores</th><td>';
 
-      // Revisar si hay más de un procesaodr
-      if (1 < sizeof($fileData->Processors->Processor)) {
+      // Obtener el número total de procesadores
+      $totalProcessors = sizeof($fileData->Processors->Processor);
+
+      // Revisar si hay más de un procesador
+      if (1 < $totalProcessors) {
         echo '<ol>';
 
-        // Revisar todas las tarjetas gráficas
-        for ($i = 0, $totalProcessors = sizeof($fileData->Processors->Processor); $i < $totalProcessors; ++$i) {
-          // Imprimir nombre de cada tarjeta
+        // Revisar todas los procesadores
+        for ($i = 0; $i < $totalProcessors; ++$i) {
+          // Imprimir nombre de cada procesador
           echo '<li>' . $fileData->Processors->Processor[$i]->Name . '</li>';
         }
 
         echo '</ol>';
       } else {
-        // Imprimir nombre de la tarjeta
+        // Imprimir nombre del procesador
         echo $fileData->Processors->Processor->Name;
       }
 
@@ -88,10 +68,13 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
       // Iniciar unidad actual
       $currentUnit = 0;
 
+      // Obtener el número total de slot
+      $totalSlot = sizeof($fileData->PhysicalMemory->Memory);
+
       // Revisar si hay más de una memoria RAM
-      if (1 < sizeof($fileData->PhysicalMemory->Memory)) {
+      if (1 < $totalSlot) {
         // Sumar capacidades de memoria RAM
-        for ($i = 0, $totalSlot = sizeof($fileData->PhysicalMemory->Memory); $i < $totalSlot; ++$i) {
+        for ($i = 0; $i < $totalSlot; ++$i) {
           $totalMemory += $fileData->PhysicalMemory->Memory[$i]->Capacity;
         }
       } else {
@@ -107,8 +90,8 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
         ++$currentUnit;
       }
 
-      // Imprimir datos de la placa base
-      echo '<tr><th>Memoria RAM total</th><td>' . ((int) $totalMemory) . $unit[$currentUnit] . '</td></tr>';
+      // Imprimir datos de la memoria RAM
+      echo '<tr><th>Memoria RAM total</th><td>' . ((int) $totalMemory) . $unit[$currentUnit] . ' (' . $totalSlot . ' slot)</td></tr>';
     }
 
 
@@ -123,12 +106,15 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
       // Imprimir datos de las tarjetas gráficos
       echo '<tr><th>Tarjetas gráficos</th><td>';
 
+      // Obtener el número total de tarjetas gráficos
+      $totalGraphicsCards = sizeof($fileData->VideoCards->Card);
+
       // Revisar si hay más de una tarjeta gráficos
-      if (1 < sizeof($fileData->VideoCards->Card)) {
+      if (1 < $totalGraphicsCards) {
         echo '<ol>';
 
         // Revisar todas las tarjetas gráficas
-        for ($i = 0, $totalGraphicsCards = sizeof($fileData->VideoCards->Card); $i < $totalGraphicsCards; ++$i) {
+        for ($i = 0; $i < $totalGraphicsCards; ++$i) {
           // Imprimir nombre de cada tarjeta
           echo '<li>' . $fileData->VideoCards->Card[$i]->Name . '</li>';
         }
@@ -144,19 +130,28 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
 
     // Si existe datos de los adaptadores de red
     if (isset($fileData->NetworkAdapters)) {
-      // Imprimir datos de las tarjetas gráficos
+      // Imprimir datos de los adaptadores de red
       echo '<tr><th>Adaptadores de red</th><td>';
 
-      // Revisar si hay más de una tarjeta gráficos
-      if (is_object($fileData->NetworkAdapters->Adapter)) {
+      // Obtener el número total de los adaptadores
+      $totalNetworkAdapters = sizeof($fileData->NetworkAdapters->Adapter);
+
+      // Revisar si hay más de un adaptador de red
+      if (1 < $totalNetworkAdapters) {
         echo '<ol>';
 
-        // Revisar todas las tarjetas gráficas
-        for ($i = 0, $totalNetworkAdapters = sizeof($fileData->NetworkAdapters->Adapter); $i < $totalNetworkAdapters; ++$i) {
+        // Revisar todos los adaptadores de red
+        for ($i = 0; $i < $totalNetworkAdapters; ++$i) {
           // Revisar si son tarjetas reales buscando la MAC
           if (!empty($fileData->NetworkAdapters->Adapter[$i]->MACAddress)) {
+            if (!empty($fileData->NetworkAdapters->Adapter[$i]->IPAddress)) {
+              $ipAddress = $fileData->NetworkAdapters->Adapter[$i]->IPAddress;
+            } else {
+              $ipAddress = '0.0.0.0';
+            }
+
             // Imprimir nombre de cada tarjeta
-            echo '<li>' . $fileData->NetworkAdapters->Adapter[$i]->Description . '</li>';
+            echo '<li>' . $fileData->NetworkAdapters->Adapter[$i]->Description . ' (IP: ' . $ipAddress . ')</li>';
           }
         }
 
@@ -174,12 +169,15 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
       // Imprimir datos de las tarjetas de sonidos
       echo '<tr><th>Tarjetas de sonidos</th><td>';
 
+      // Obtener el número total de tarjetas de sonidos
+      $totalSoundDevice = sizeof($fileData->SoundDevice->Device);
+
       // Revisar si hay más de una tarjeta de sonidos
-      if (1 < sizeof($fileData->SoundDevice->Device)) {
+      if (1 < $totalSoundDevice) {
         echo '<ol>';
 
         // Revisar todas las tarjetas de sonidos
-        for ($i = 0, $totalSoundDevice = sizeof($fileData->SoundDevice->Device); $i < $totalSoundDevice; ++$i) {
+        for ($i = 0; $i < $totalSoundDevice; ++$i) {
           // Imprimir nombre de cada tarjeta
           echo '<li>' . $fileData->SoundDevice->Device[$i]->Name . '</li>';
         }
@@ -193,25 +191,54 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
       echo '</td></tr>';
     }
 
+    // Si existe datos de los lectores
+    if (isset($fileData->CDROMDrives)) {
+      // Imprimir datos de los lectores
+      echo '<tr><th>Lector de CD/DVD</th><td>';
+
+      // Obtener el número total de lectores
+      $totalCDROMDrives = sizeof($fileData->CDROMDrives->Drive);
+
+      // Revisar si hay más de un lector
+      if (1 < $totalCDROMDrives) {
+        echo '<ol>';
+
+        // Revisar todos los lectores
+        for ($i = 0; $i < $totalCDROMDrives; ++$i) {
+          // Imprimir nombre de cada lector
+          echo '<li>' . $fileData->CDROMDrives->Drive[$i]->Name . '</li>';
+        }
+
+        echo '</ol>';
+      } else {
+        // Imprimir nombre del lector
+        echo $fileData->CDROMDrives->Drive->Name;
+      }
+
+      echo '</td></tr>';
+    }
 
     // Si existe datos de las impresoras
     if (isset($fileData->Printers)) {
       // Imprimir datos de las impresoras
       echo '<tr><th>Impresoras</th><td>';
 
+      // Obtener el número total de impresoras
+      $totalPrinters = sizeof($fileData->Printers->Printer);
+
       // Revisar si hay más de una impresora
-      if (1 < sizeof($fileData->Printers->Printer)) {
+      if (1 < $totalPrinters) {
         echo '<ol>';
 
-        // Revisar todas las tarjetas gráficas
-        for ($i = 0, $totalSoundDevice = sizeof($fileData->Printers->Printer); $i < $totalSoundDevice; ++$i) {
-          // Imprimir nombre de cada tarjeta
+        // Revisar todas las impresoras
+        for ($i = 0; $i < $totalPrinters; ++$i) {
+          // Imprimir nombre de cada impresora
           echo '<li>' . $fileData->Printers->Printer[$i]->Name . '</li>';
         }
 
         echo '</ol>';
       } else {
-        // Imprimir nombre de la tarjeta
+        // Imprimir nombre de la impresora
         echo $fileData->Printers->Printer->Name;
       }
 
@@ -227,22 +254,25 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
 
     // Si existe datos de los programas instalados
     if (isset($fileData->Software)) {
-      // Imprimir datos de las tarjetas de sonidos
+      // Imprimir datos de los porgramas instalados
       echo '<tr><th>Softwares</th><td>';
 
-      // Revisar si hay más de una tarjeta gráficos
-      if (1 < sizeof($fileData->Software->Product)) {
+      // Obtener el número total de programas instalados
+      $totalSoftwares = sizeof($fileData->Software->Product);
+
+      // Revisar si hay más de un programas instalado
+      if (1 < $totalSoftwares) {
         echo '<ol>';
 
-        // Revisar todas las tarjetas gráficas
-        for ($i = 0, $totalSoundDevice = sizeof($fileData->Software->Product); $i < $totalSoundDevice; ++$i) {
-          // Imprimir nombre de cada tarjeta
+        // Revisar todos los programas instalados
+        for ($i = 0; $i < $totalSoftwares; ++$i) {
+          // Imprimir nombre de cada programa
           echo '<li>' . $fileData->Software->Product[$i]->Name . '</li>';
         }
 
         echo '</ol>';
       } else {
-        // Imprimir nombre de la tarjeta
+        // Imprimir nombre del programa
         echo $fileData->Software->Product->Name;
       }
 
@@ -250,6 +280,9 @@ if (isset($_GET['fileName']) && !empty($_GET['fileName'])) {
     }
 
     echo '</table>';
+  } else {
+    // No se pudo controlar la carpeta, imprimir mensaje de error
+    echo '<div class="errorMessage">No se pudo leer el detalle de este equipo</div>';
   }
 } else {
   echo '<div class="errorMessage">No hubo ningún solicitud detalles</div>';
